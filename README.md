@@ -50,3 +50,5 @@ An example command to run `greta.py` with grouping parameters 1 pc, 3 km/s and 1
 ```bash
 python greta.py -i sinkfilename.amuse -o output.amuse -d 1 -v 3 -t 1
 ```
+
+Acronym was generated using `ACRONYM` ([Cook 2019](https://arxiv.org/abs/1903.12180)). 
