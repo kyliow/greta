@@ -46,11 +46,6 @@ def assign_sink_group(
         sink.in_group = 0
 
     number_of_groups = sink_particles.in_group.max()
-    print(
-        f"Parameters: distance {group_radius}, speed {group_speed}, "
-        + f"age {group_age}"
-    )
-
     initialised = sink.initialised or False
     if not initialised:
 
@@ -115,11 +110,10 @@ def assign_sink_group(
 def form_stars_from_group(
     group_index,
     sink_particles,
-    lower_mass_limit=0.5|units.Msun,
+    lower_mass_limit=0.5|units.MSun,
     upper_mass_limit=100|units.MSun,
     local_sound_speed=0.3 | units.kms,
     minimum_sink_mass=0.01 | units.MSun,
-    logger=None,
     randomseed=None,
     shrink_sinks=True,
     **keyword_arguments
@@ -127,6 +121,8 @@ def form_stars_from_group(
     """
     Form stars from specific group of sinks.
     """
+    if randomseed is not None:
+        numpy.random.seed(randomseed)
 
     # Consider only group with input group index from here onwards.
     group = sink_particles[sink_particles.in_group == group_index]
@@ -204,10 +200,6 @@ def form_stars_from_group(
         star_forming_regions.mass/star_forming_regions.mass.sum()
     )
     probabilities /= probabilities.sum()    # Ensure sum is exactly 1
-    logger.info(
-        "Max & min probabilities: %s, %s",
-        probabilities.max(), probabilities.min()
-    )
 
     # Create index list of star forming regions from probability list
     sample = numpy.random.choice(

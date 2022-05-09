@@ -60,10 +60,40 @@ def new_argument_parser():
         default=100,
         help='Upper star mass limit in MSun [100]'
     )
+    parser.add_argument(
+        '-r',
+        dest='randomseed',
+        default=None,
+        help='Random seed [None]'
+    )
     return parser.parse_args()
 
 
+def preface():
+    msg = (
+    """
+ ██████╗ ██████╗ ███████╗████████╗ █████╗ 
+██╔════╝ ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗
+██║  ███╗██████╔╝█████╗     ██║   ███████║
+██║   ██║██╔══██╗██╔══╝     ██║   ██╔══██║
+╚██████╔╝██║  ██║███████╗   ██║   ██║  ██║
+ ╚═════╝ ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝
+    
+GRoupEd sTar formAtion © Kong You Liow 
+
+References:
+-   Liow K. Y., Rieder S., Dobbs C. L., Jaffa S. E., 2022, 
+    MNRAS, 510, 2657
+-   Rieder S., Dobbs C. L., Bending T., Liow K. Y., Wurster J., 2022, 
+    MNRAS, 509, 6155
+    """
+    )
+    print(msg)
+
+
 def main():
+    preface()
+
     o = new_argument_parser()
     sinkfilename = o.sinkfilename
     starfilename = o.starfilename
@@ -72,9 +102,15 @@ def main():
     grouping_age = o.grouping_age | units.Myr
     mass_lower = o.mass_lower | units.MSun
     mass_upper = o.mass_upper | units.MSun
+    randomseed = o.randomseed
+
+    if randomseed is None:
+        randomseed = numpy.random.randint(2**32-1)
+    else:
+        randomseed = int(randomseed)
+
 
     sinks = read_set_from_file(sinkfilename, 'amuse')
-    print(f"{len(sinks)} sink particles")
 
     if not hasattr(sinks, 'position'):
         msg = (
@@ -83,7 +119,7 @@ def main():
         print(msg)
         exit()
 
-    if not hassattr(sinks, 'velocity'):
+    if not hasattr(sinks, 'velocity'):
         msg = (
             "WARNING: Sink particles have no velocities! Assuming they are "
             + "stationary."
@@ -101,10 +137,10 @@ def main():
         print(msg)
         sinks.radius = 0.1 | units.pc
 
-    if not hassattr(sinks, 'birth_time'):
+    if not hasattr(sinks, 'birth_time'):
         msg = (
-            "Sink particles have no attribute 'birth_time', setting to "
-            + "0 Myr, i.e. assuming that all sink particles have zero age."
+            "WARNING: Sink particles have no attribute 'birth_time', setting "
+            + "to 0 Myr, i.e. assuming that all sink particles have zero age."
         )
         print(msg)
         sinks.birth_time = 0 | units.Myr
@@ -114,9 +150,12 @@ def main():
     sinks.initialised = False
     sinks = sinks.sorted_by_attribute('mass').reversed()
     Nsinks = len(sinks)
+    Msinks = sinks.total_mass()
+    print(f"Number of sinks: {Nsinks}")
+    print(f"Total sink mass: {Msinks.in_(units.MSun)}")
     for i, sink in enumerate(sinks):
         if i % int(Nsinks/5) == 0:
-            print(f"Progress: {100*i/Nsinks:.2f}%")
+            print(f"Progress: {i}/{Nsinks}")
 
         sink = assign_sink_group(
             sink,
@@ -126,7 +165,7 @@ def main():
             group_age=grouping_age,
         )
 
-    print(f"{len(set(sinks.in_group))} groups found.")
+    print(f"Number of groups: {len(set(sinks.in_group))}")
 
     # Sanity check: each sink particle must be in a group.
     ungrouped_sinks = sinks.select_array(
@@ -143,7 +182,7 @@ def main():
     stars = Particles()
     for i in range(Ngroup):
         if i % int(Ngroup/5) == 0:
-            print(f"Progress: {100*i/Ngroup:.2f}%")
+            print(f"Progress: {i}/{Ngroup}")
 
         i += 1
         new_stars = form_stars_from_group(
@@ -151,7 +190,7 @@ def main():
             sink_particles=sinks,
             lower_mass_limit=mass_lower,
             upper_mass_limit=mass_upper,
-            randomseed=numpy.random.randint(2**32-1),
+            randomseed=randomseed,
             shrink_sinks=False
         )
         if new_stars is not None:
@@ -159,11 +198,13 @@ def main():
 
     Nstars = len(stars)
     Mstars = stars.total_mass().in_(units.MSun)
+    fraction = Mstars/Msinks
     print(f"Number of stars: {Nstars}")
     print(f"Total star mass: {Mstars}")
     print(f"Most massive star: {stars.mass.max().in_(units.MSun)}")
-    print(f"Average star mass: {Mstars/Nstars}")
-    write_set_to_file(stars, starfilename, 'amuse')
+    print(f"Average star mass: {(Mstars/Nstars).in_(units.MSun)}")
+    print(f"Mstars/Msinks fraction: {fraction:.4f}")
+    write_set_to_file(stars, starfilename, 'amuse', overwrite_file=True)
 
     print(f"Star file written as {starfilename}")
 
