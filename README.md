@@ -2,6 +2,7 @@
 GRoupEd sTar formAtion: converting sink particles to stars that are sampled from observational initial mass function (IMF).
 
 Paper: Liow K. Y., Rieder S., Dobbs C. L., Jaffa S. E., 2022, MNRAS, 510, 2657
+ADS link of the paper [here](https://ui.adsabs.harvard.edu/abs/2022MNRAS.510.2657L/abstract).
 
 Grouped star formation is developed to form stars dynamically in parsec-scale simulations, such that that the sink particles are first grouped together, then the total group masses are used to sample the IMF and form stars. The current version is not designed to be used to generate initial conditions.
 
