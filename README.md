@@ -5,6 +5,8 @@ Paper: Liow K. Y., Rieder S., Dobbs C. L., Jaffa S. E., 2022, MNRAS, 510, 2657
 
 Grouped star formation is developed to form stars dynamically in parsec-scale simulations, such that that the sink particles are first grouped together, then the total group masses are used to sample the IMF and form stars. The current version is not designed to be used to generate initial conditions.
 
+`greta` is built upon the [AMUSE framework](https://github.com/amusecode/amuse).
+
 # Installation
 
 First, install `AMUSE`:
@@ -14,7 +16,7 @@ pip install amuse-framework
 pip install amuse
 ```
 
-Then, install my version of `AMUSE MASC` (c. Rieder) and create a symbolic link:
+Then, install my version of `AMUSE MASC` (c.f. Steven Rieder's [MASC](https://github.com/rieder/MASC)) and create a symbolic link:
 
 ```bash
 git clone https://github.com/kyliow/MASC.git masc
