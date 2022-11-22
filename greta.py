@@ -108,7 +108,7 @@ def main():
         randomseed = numpy.random.randint(2**32-1)
     else:
         randomseed = int(randomseed)
-
+    numpy.random.seed(randomseed)
 
     sinks = read_set_from_file(sinkfilename, 'amuse')
 
@@ -190,7 +190,7 @@ def main():
             sink_particles=sinks,
             lower_mass_limit=mass_lower,
             upper_mass_limit=mass_upper,
-            randomseed=randomseed,
+            randomseed=numpy.random.randint(2**32-1),
             shrink_sinks=False
         )
         if new_stars is not None:
